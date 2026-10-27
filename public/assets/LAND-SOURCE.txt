@@ -1,0 +1,9 @@
+Coastlines: Natural Earth, public domain.
+Distribution: world-atlas 2, land-50m.json (Mike Bostock).
+Source: https://cdn.jsdelivr.net/npm/world-atlas@2/land-50m.json
+Dataset: https://www.naturalearthdata.com/about/terms-of-use/
+Accessed: 2026-10-26.
+
+The land geometry supplies geographic context only. Temperature and relief
+are computed separately from the real NASA GISS GISTEMP gridded data.
+The scale is 1:50 million, not a precision of 50 metres.
