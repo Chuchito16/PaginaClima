@@ -50,7 +50,7 @@ function thermalMaterial(morph) {
     side: THREE.DoubleSide, toneMapped: false,
   });
 }
-function lineMaterial(morph, { color = '#203b35', opacity = 0.8 } = {}) {
+function lineMaterial(morph, { color = '#2a2a2a', opacity = 0.8 } = {}) {
   const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
   material.onBeforeCompile = shader => {
     shader.uniforms.uGlobeMorph = morph;
@@ -103,7 +103,7 @@ export async function createGlobe(container, { onHover = () => {}, onSelect = ()
   const rim = new THREE.DirectionalLight('#88b3c2', 0.65); rim.position.set(3, -1, -3); scene.add(rim);
   const base = new THREE.Mesh(new THREE.SphereGeometry(INNER_GLOBE_RADIUS, 96, 64), new THREE.MeshBasicMaterial({ color: MISSING_SURFACE_COLOR, toneMapped: false }));
   scene.add(base, atmosphere());
-  const marker = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 10, 8), new THREE.MeshBasicMaterial({ color: '#17251e' }));
+  const marker = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 10, 8), new THREE.MeshBasicMaterial({ color: '#1a1a1a' }));
   marker.visible = false; scene.add(marker);
 
   let frame = null, heatMesh = null, coast = null, selectionLine = null, selection = null;
@@ -256,7 +256,7 @@ export async function createGlobe(container, { onHover = () => {}, onSelect = ()
       const steps = Math.max(1, Math.ceil(Math.max(Math.abs(deltaLon), Math.abs(b[1] - a[1])) / 0.75));
       for (let step = 0; step < steps; step += 1) coordinates.push([a[0] + deltaLon * step / steps, a[1] + (b[1] - a[1]) * step / steps], [a[0] + deltaLon * (step + 1) / steps, a[1] + (b[1] - a[1]) * (step + 1) / steps]);
     }
-    if (coordinates.length) { selectionLine = makeLine(coordinates, { color: '#122a1c', opacity: 1, lift: 0.010 }); scene.add(selectionLine); }
+    if (coordinates.length) { selectionLine = makeLine(coordinates, { color: '#111111', opacity: 1, lift: 0.010 }); scene.add(selectionLine); }
   }
   function resize() {
     const width = Math.max(1, container.clientWidth), height = Math.max(1, container.clientHeight); camera.aspect = width / height;
@@ -284,7 +284,7 @@ export async function createGlobe(container, { onHover = () => {}, onSelect = ()
       if (disposed) return;
       const arcs = decodedArcs(topology), coordinates = [];
       for (const arc of arcs) for (let i = 1; i < arc.length; i += 1) coordinates.push(arc[i - 1], arc[i]);
-      coast = makeLine(coordinates, { color: '#203c36', opacity: 0.75, lift: 0.0035 }); scene.add(coast);
+      coast = makeLine(coordinates, { color: '#2a2a2a', opacity: 0.75, lift: 0.0035 }); scene.add(coast);
 
     }).catch(() => { /* Scientific data work independently of cartography. */ });
   const api = {

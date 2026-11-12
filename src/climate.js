@@ -52,7 +52,7 @@ export const PALETTE = [
 ];
 
 export function temperatureColor(value) {
-  if (!Number.isFinite(value)) return '#495a54';
+  if (!Number.isFinite(value)) return '#595959';
   const i = PALETTE.findIndex(([v]) => v >= value);
   if (i === 0) return PALETTE[0][1];
   if (i < 0) return PALETTE.at(-1)[1];

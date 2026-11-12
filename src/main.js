@@ -176,6 +176,7 @@ function selectMapPoint(point) {
 }
 
 function offset(){return area.type==='world'?referenceOffset(dataset.baseline1880To1900,reference):0;}
+function parisLevels(){return area.type==='world'?[1.5,2].map(v=>v+dataset.baseline1880To1900+offset()):[];}
 function adjusted(value){return Number.isFinite(value)?value+offset():null;}
 function referenceLabel(){return area.type==='world'&&reference==='preindustrial'?'1880–1900 · aproximación':'1951–1980 · NASA';}
 
@@ -215,7 +216,7 @@ function updateFrame(withSound=false) {
  $('#coverage-warning').textContent=`En este mes hay datos para el ${percent(row.coverage)} del área. ${row.coverage<.5?'No calculamos un promedio con menos del 50 % de cobertura.':'La cobertura es baja; el promedio puede no representar todo el lugar.'} Las variaciones de cobertura también afectan la comparación entre meses.`;
  if(globe&&gridValues){const f=meta.frames.findIndex(r=>r.year===row.year&&r.month===row.month),size=meta.rows*meta.cols;globe.setFrame({...meta,values:f>=0?gridValues.subarray(f*size,(f+1)*size):new Int16Array(size).fill(meta.missing),offset:0,transitionMs:Math.min(Number($('#speed').value),400)});}
  const marker=$('#chart-marker');if(marker){marker.setAttribute('x1',chartX(current));marker.setAttribute('x2',chartX(current));}
- renderMoment();renderAnnual();if(withSound)audio.play(value);
+ renderMoment();renderAnnual();if(withSound)audio.play(value,{thresholds:parisLevels()});
 }
 
 function renderMoment() {
@@ -245,13 +246,13 @@ function renderTimeline() {
  const line=arr=>{let open=false;return arr.map((v,i)=>{if(!Number.isFinite(v)){open=false;return'';}const point=`${open?'L':'M'}${chartX(i).toFixed(2)},${y(v).toFixed(2)}`;open=true;return point;}).join(' ');};
  let html=`<title>Temperatura de ${escapeHtml(area.name)}</title><desc>Anomalías mensuales y promedio de doce meses. La línea vertical marca el mes seleccionado. También puedes explorar los valores con el control mensual o descargar CSV.</desc>`;
  const step=(max-min)>4?1:.5;
- for(let v=Math.ceil(min/step)*step;v<=max;v+=step)html+=`<line x1="48" x2="${chartWidth-22}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e7df"/><text x="37" y="${y(v)+4}" text-anchor="end" class="chart-label">${v.toFixed(1).replace('.',',')}°</text>`;
+ for(let v=Math.ceil(min/step)*step;v<=max;v+=step)html+=`<line x1="48" x2="${chartWidth-22}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e3e3"/><text x="37" y="${y(v)+4}" text-anchor="end" class="chart-label">${v.toFixed(1).replace('.',',')}°</text>`;
  for(let i=0;i<paris.length;i++)html+=`<line x1="48" x2="${chartWidth-22}" y1="${y(paris[i])}" y2="${y(paris[i])}" stroke="${i?'#c95b43':'#bc8a25'}" stroke-dasharray="4 5"/><text x="${chartWidth-22}" y="${y(paris[i])-6}" text-anchor="end" class="threshold-label" fill="${i?'#ad4b37':'#966f21'}">PARÍS +${i?'2,0':'1,5'} °C</text>`;
- if(showWorld)html+=`<path d="${line(global)}" fill="none" stroke="#747d73" stroke-width="1.4" stroke-dasharray="4 4"/>`;
- html+=`<path d="${line(values)}" fill="none" stroke="#87b878" stroke-width="1.3" stroke-opacity=".75"/><path d="${line(moving)}" fill="none" stroke="#1d6511" stroke-width="2.8" stroke-linejoin="round"/>`;
+ if(showWorld)html+=`<path d="${line(global)}" fill="none" stroke="#747474" stroke-width="1.4" stroke-dasharray="4 4"/>`;
+ html+=`<path d="${line(values)}" fill="none" stroke="#989898" stroke-width="1.3" stroke-opacity=".75"/><path d="${line(moving)}" fill="none" stroke="#a81c25" stroke-width="2.8" stroke-linejoin="round"/>`;
  const ticks=chartWidth<500?3:6;for(let t=0;t<=ticks;t++){const i=Math.round(t/ticks*(selected.length-1));html+=`<text x="${chartX(i)}" y="265" text-anchor="middle" class="chart-label">${selected.length>36?selected[i].year:shortMonth(selected[i])}</text>`;}
- html+=`<line id="chart-marker" x1="${chartX(current)}" x2="${chartX(current)}" y1="25" y2="240" stroke="#171d15" stroke-dasharray="3 4"/>`;
- const comparison=compareWindows(selected,Number($('#window').value));if(comparison)html+=`<path d="M${chartX(0)} 279H${chartX(comparison.size-1)} M${chartX(selected.length-comparison.size)} 279H${chartX(selected.length-1)}" stroke="#2ab20b" stroke-width="3"/>`;
+ html+=`<line id="chart-marker" x1="${chartX(current)}" x2="${chartX(current)}" y1="25" y2="240" stroke="#111111" stroke-dasharray="3 4"/>`;
+ const comparison=compareWindows(selected,Number($('#window').value));if(comparison)html+=`<path d="M${chartX(0)} 279H${chartX(comparison.size-1)} M${chartX(selected.length-comparison.size)} 279H${chartX(selected.length-1)}" stroke="#d22730" stroke-width="3"/>`;
  $('#timeline').innerHTML=html;
 }
 
@@ -264,9 +265,9 @@ function renderAnnual() {
  const y=v=>169-(v-min)/(max-min)*141;const width=(annualWidth-48)/12;
  let html='<title>Anomalías mensuales del año seleccionado</title>';
  for(const v of [min,max])html+=`<text x="28" y="${y(v)+4}" text-anchor="end" class="chart-label">${v.toFixed(1).replace('.',',')}°</text>`;
- html+=`<line x1="36" x2="${annualWidth-12}" y1="${y(0)}" y2="${y(0)}" stroke="#b7c1b3"/>`;
+ html+=`<line x1="36" x2="${annualWidth-12}" y1="${y(0)}" y2="${y(0)}" stroke="#b9b9b9"/>`;
  const labels=['E','F','M','A','M','J','J','A','S','O','N','D'];
- for(let i=0;i<12;i++){const v=values[i],x=36+i*width+3;const top=Number.isFinite(v)?Math.min(y(v),y(0)):165;const h=Number.isFinite(v)?Math.max(2,Math.abs(y(v)-y(0))):4;html+=`<rect x="${x}" y="${top}" width="${Math.max(4,width-6)}" height="${h}" rx="2" fill="${Number.isFinite(v)?temperatureColor(v):'#d9ddd5'}" ${i+1===row.month?'stroke="#111b0e" stroke-width="2"':''}/><text x="${x+(width-6)/2}" y="192" text-anchor="middle" class="chart-label">${labels[i]}</text>`;}
+ for(let i=0;i<12;i++){const v=values[i],x=36+i*width+3;const top=Number.isFinite(v)?Math.min(y(v),y(0)):165;const h=Number.isFinite(v)?Math.max(2,Math.abs(y(v)-y(0))):4;html+=`<rect x="${x}" y="${top}" width="${Math.max(4,width-6)}" height="${h}" rx="2" fill="${Number.isFinite(v)?temperatureColor(v):'#dadada'}" ${i+1===row.month?'stroke="#111111" stroke-width="2"':''}/><text x="${x+(width-6)/2}" y="192" text-anchor="middle" class="chart-label">${labels[i]}</text>`;}
  $('#annual-chart').innerHTML=html;
 }
 
